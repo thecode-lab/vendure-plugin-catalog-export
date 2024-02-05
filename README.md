@@ -1,1 +1,3 @@
 # venduer-plugin-productcatalog.json
+
+I'm developing a plugin with the goal of optimizing server performance. This plugin generates a JSON representation of the complete product catalog and exposes it through a REST API. The JSON data can be fetched in the frontend to dynamically generate sitemaps and product feeds for SEO purposes. This approach helps prevent server overload.....
