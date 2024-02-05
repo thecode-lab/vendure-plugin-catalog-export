@@ -1,0 +1,1 @@
+# venduer-plugin-productcatalog.json
