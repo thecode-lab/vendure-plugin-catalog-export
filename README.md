@@ -30,8 +30,3 @@ http://localhost:3000/productcatalog to access the json
 
 # Todo
 yarnpkg and npm... 
-
-maybe if necessary ProductCatalogPlugin.init(
-    // localStoragePath:???? 
-)
-
