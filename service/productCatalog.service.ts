@@ -41,7 +41,6 @@ export class ProductCatalogService {
   constructor(
     private productService: ProductService,
     private configService: ConfigService,
-    private assetService:AssetService,
     ) {}
 
   private readonly filePath = path.join(ProductCatalogPlugin.localPath,"productcatalog.json");
