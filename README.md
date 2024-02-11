@@ -8,8 +8,18 @@ const config: VendureConfig = {
   // ... other configurations
 
   plugins: [
-    ProductCatalogPlugin,
-    CronPlugin.init({
+    ProductCatalogPlugin.init({
+      localPath:'../myCatalogDir', //relative to AssetUploadDir
+    }),
+    ....
+  ],
+};
+```
+
+```typescript
+//if you want to use cronjobs in vendure vendure-cron-plugin
+
+CronPlugin.init({
       cron: [
         {
           schedule: '0 */12 * * *',
@@ -17,21 +27,13 @@ const config: VendureConfig = {
         },
       ],
     }),
-  ],
-};
+
 ```
 
-# Dependencies
-yarn add vendure-cron-plugin
-
 # APIs
-http://localhost:3000/productcatalog-init to init the catalog
+http://localhost:3000/productcatalog-save to init and save catalog
 http://localhost:3000/productcatalog to access the json 
 
 # Todo
 yarnpkg and npm... 
-
-maybe if necessary ProductCatalogPlugin.init(
-    // localStoragePath:???? 
-)
 

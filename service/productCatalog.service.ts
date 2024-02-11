@@ -1,17 +1,13 @@
-import * as fs from "fs";
-import * as path from "path";
 import { Injectable } from "@nestjs/common";
 import {
   ProductService,
   RequestContext,
-  ProductVariantService,
-  Translated,
-  ProductVariant,
-  Product,
-  ProductOptionService,
-  ProductOptionGroupService,
   ID,
+  ConfigService,
+  AssetService,
 } from "@vendure/core";
+import * as path from "path";
+import { ProductCatalogPlugin } from "../ProductCatalog.plugin";
 
 function capitalizeFirstLetter(input: string): string {
   return input
@@ -20,36 +16,56 @@ function capitalizeFirstLetter(input: string): string {
     .join(" ");
 }
 
-@Injectable()
+async function streamToJson(stream: any): Promise<any> {
+  return new Promise((resolve, reject) => {
+      let data = '';
+      stream.on('data', (chunk) => {
+          data += chunk.toString();
+      });
+      stream.on('end', () => {
+          try {
+              const jsonData = JSON.parse(data);
+              resolve(jsonData);
+          } catch (error) {
+              reject(error);
+          }
+      });
+      stream.on('error', (error) => {
+          reject(error);
+      });
+  });
+}
+
+@Injectable() 
 export class ProductCatalogService {
   constructor(
-    private ProductService: ProductService,
-    private ProductVariantService: ProductVariantService,
+    private productService: ProductService,
+    private configService: ConfigService,
+    private assetService:AssetService,
+    ) {}
 
-  ) {}
-  private static readonly catalogDirectory = "./static/productcatalog";
-  private static readonly catalogFilePath = path.join(
-    ProductCatalogService.catalogDirectory,
-    "productcatalog.json"
-  );
+  private readonly filePath = path.join(ProductCatalogPlugin.localPath,"productcatalog.json");
 
   async getAllProductRel(ctx:RequestContext){
-      return await this.ProductService.findAll(
+      return await this.productService.findAll(
           ctx,
           { skip:0, take:100 },
           ['variants', 'variants.options','optionGroups', 'assets', 'featuredAsset','facetValues','facetValues.facet', 'variants.featuredAsset', 'variants.assets']
           );
   }
 
+  
   async getProductCatalogData(ctx: RequestContext) {
+   
+    
     try {
       const batchSize = 100;
       let offset = 0;
-      let allVariants: Translated<ProductVariant>[] = [];
-      let allProducts: Translated<Product>[] = [];
+      const undefindedVariants: { variantId: ID; productName: string }[] = [];
+      let selectedProductCatalog = {}; //writeFileFromBuffer doesnt support append.
 
       while (true) {
-        const batch = await this.ProductService.findAll(
+        const productsBatch = await this.productService.findAll(
           ctx,
           { skip: offset, take: batchSize },
           [
@@ -65,58 +81,21 @@ export class ProductCatalogService {
           ]
         );
 
-        if (batch.items.length === 0) {
+        if (productsBatch.items.length === 0) {
           break;
         }
 
-        allProducts = allProducts.concat(batch.items);
-
-        if (batch.items.length < batchSize) {
-          break;
-        }
-
-        offset += batchSize;
-      }
-
-      offset = 0;
-      while (true) {
-        const batch = await this.ProductVariantService.findAll(ctx, {
-          skip: offset,
-          take: batchSize,
-        });
-
-        if (batch.items.length === 0) {
-          break;
-        }
-
-        allVariants = allVariants.concat(batch.items);
-
-        if (batch.items.length < batchSize) {
-          break;
-        }
-
-        offset += batchSize;
-      }
-
-      const productVariantMap: { [id: number]: any } = {};
-      allVariants.forEach((variants) => {
-        productVariantMap[variants.id] = variants;
-      });
-      const selectedProductCatalog = {};
-      const failedVariants: { variantId: ID; productName: string, productId:ID, SKU:any }[] = [];
-
-      for (const productId in allProducts) {
-        if (allProducts.hasOwnProperty(productId)) {
-          const product = allProducts[productId];
+        for (const product of productsBatch.items) {
+          const { id, name, slug, updatedAt, customFields, variants } = product;
           if (!product.enabled) {
             continue;
           }
-          selectedProductCatalog[productId] = {
-            id: product.id,
-            name: product.name,
-            slug: product.slug,
-            updatedAt: product.updatedAt,
-            customFields: product.customFields,
+          selectedProductCatalog[id] = {
+            id,
+            name,
+            slug,
+            updatedAt,
+            customFields,
             facetValues: product.facetValues
               ? product.facetValues
                   .filter((facetValue) => !facetValue.facet.isPrivate)
@@ -135,114 +114,116 @@ export class ProductCatalogService {
                   source: asset.asset.source,
                 }))
               : [],
-            featuredAsset: {
-              preview: product.featuredAsset?.preview,
-              source: product.featuredAsset?.source,
-              name: product.featuredAsset?.name,
-            },
-            optionsGroups: product.optionGroups
-              ? product.optionGroups.map((optionGroup) => ({
-                  id: optionGroup.id,
-                  code: optionGroup.code,
-                  name: optionGroup.translations.find(
-                    (translation) =>
-                      translation.languageCode == ctx.languageCode
-                  )?.name,
-                }))
-              : [],
-          };
-
-          selectedProductCatalog[productId].variants = product.variants
-    .filter((variant) => variant.enabled)
-    .map((variant) => {
-        const variantId = variant.id;
-        const variantPrice = productVariantMap[variantId]?.priceWithTax;
-
-        if (variantPrice === undefined) {
-            failedVariants.push({
-                variantId,
-                productName: product.name,
-                productId:product.id,
-                SKU: variant.sku,
-            });
-        }
-
-    
-
-        return {
-            id: variantId,
-            priceWithTax: variantPrice,
-            dicount: variant.customFields.discount,
-            currencyCode: productVariantMap[variantId]?.currencyCode,
-            stockonHand: variant.stockOnHand,
-            outOfStockThreshold: variant.outOfStockThreshold,
-            sku: variant.sku,
-            name: variant.translations[0]?.name,
-            assets: variant.assets
-                ? variant.assets.map((asset) => ({
-                    preview: asset.asset.preview,
-                    source: asset.asset.source,
-                }))
-                : [],
-            featuredAsset: variant.featuredAsset
-                ? {
-                    preview: variant.featuredAsset.preview,
-                    source: variant.featuredAsset.source,
-                }
-                : {},
-            options: variant.options
-                ? variant.options.map((options) => ({
-                    code: options.code,
-                    name: options.translations.find(
-                        (translation) =>
-                            translation.languageCode == ctx.languageCode
+              featuredAsset: {
+                preview: product.featuredAsset?.preview,
+                source: product.featuredAsset?.source,
+                name: product.featuredAsset?.name,
+              },
+              optionsGroups: product.optionGroups
+                ? product.optionGroups.map((optionGroup) => ({
+                    id: optionGroup.id,
+                    code: optionGroup.code,
+                    name: optionGroup.translations.find(
+                      (translation) =>
+                        translation.languageCode == ctx.languageCode
                     )?.name,
-                }))
+                  }))
                 : [],
-              };
-          });
+            
+            variants: variants
+              .filter((variant) => variant.enabled)
+              .map((variant) => {
+                const variantId = variant.id;
+                const variantPrice = variant?.priceWithTax;
+                const variantSku = variant?.sku;
+        
+                if (variantPrice === undefined ||variantSku === undefined ) {
+                  undefindedVariants.push({
+                        variantId,
+                        productName: product.name,
+                    });
+                }
+        
+                return {
+                    id: variantId,
+                    priceWithTax: variant.priceWithTax,
+                    currencyCode:variant.currencyCode,
+                    stockonHand: variant.stockOnHand,
+                    outOfStockThreshold: variant.outOfStockThreshold,
+                    sku: variant.sku,
+                    name: variant.translations[0]?.name,
+                    assets: variant.assets
+                        ? variant.assets.map((asset) => ({
+                            preview: asset.asset.preview,
+                            source: asset.asset.source,
+                        }))
+                        : [],
+                    featuredAsset: variant.featuredAsset
+                        ? {
+                            preview: variant.featuredAsset.preview,
+                            source: variant.featuredAsset.source,
+                        }
+                        : {},
+                    options: variant.options
+                        ? variant.options.map((options) => ({
+                            code: options.code,
+                            name: options.translations.find(
+                                (translation) =>
+                                    translation.languageCode == ctx.languageCode
+                            )?.name,
+                        }))
+                        : [],
+                      };
+                  
+                
+              }),
+          };
         }
+
+
+        offset += batchSize;
       }
+
       const totalItems = Object.keys(selectedProductCatalog).length
-      return {productCatalog:selectedProductCatalog,totalItems,failedVariants};
+      await this.saveCatalogToFile(selectedProductCatalog,totalItems);
+      return {productCatalog:selectedProductCatalog,totalItems, undefindedVariants};
 
     } catch (error) {
       throw error;
     }
   }
 
-  saveCatalogToFile(catalogData: any): void {
+  async saveCatalogToFile(selectedProductCatalog: any, totalItems:number) {
     try {
-      if (!fs.existsSync(ProductCatalogService.catalogDirectory)) {
-        fs.mkdirSync(ProductCatalogService.catalogDirectory, {
-          recursive: true,
-        });
+      const catalogData={
+        productCatalog: selectedProductCatalog,
+        totalItems:totalItems,
       }
-      if (!fs.existsSync(ProductCatalogService.catalogFilePath)) {
-        fs.writeFileSync(ProductCatalogService.catalogFilePath, "", "utf-8");
-      }
-
-      const catalogJson = JSON.stringify(catalogData, null, 2);
-      fs.writeFileSync(
-        ProductCatalogService.catalogFilePath,
-        catalogJson,
-        "utf-8"
-      );
+      const buffer = Buffer.from(JSON.stringify(catalogData, null, 2), "utf-8");
+      await this.configService.assetOptions.assetStorageStrategy.writeFileFromBuffer(this.filePath, buffer);
+        
     } catch (error) {
-      console.error("Error saving catalog data to file:", error);
+        console.error("Error saving catalog data to file:", error);
+      throw error;
     }
   }
 
-  readCatalogFromFile(): any {
+
+  async readCatalogFromFile(): Promise<any> {
     try {
-      const catalogJson = fs.readFileSync(
-        ProductCatalogService.catalogFilePath,
-        "utf-8"
-      );
-      return JSON.parse(catalogJson);
+      const stream = await this.configService.assetOptions.assetStorageStrategy.readFileToStream(this.filePath);
+      
+      if (stream) {
+        const jsonData = await streamToJson(stream);
+        return jsonData;
+      } else {
+        console.error("Catalog JSON file not found.");
+        return null;
+      }
     } catch (error) {
-      console.error("Error reading catalog data from file:", error);
+      console.error("Error reading catalog data from asset:", error);
       return null;
     }
   }
+  
 }
