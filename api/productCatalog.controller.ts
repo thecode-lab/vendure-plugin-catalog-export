@@ -13,14 +13,14 @@ import {ProductCatalogService} from '../service/productCatalog.service';
     } 
  }
 
- //read and save enabled products to json 
+ //save enabled products to json 
 @Controller('productcatalog-save')
 export class ProductsCatalogControllerInit {
     constructor(private ProductCatalogService: ProductCatalogService) {
     }
     @Get()
      async initAll(@Ctx() ctx: RequestContext) {    
-        const catalog = await this.ProductCatalogService.getProductCatalogData(ctx);
+        const catalog = await this.ProductCatalogService.saveProductCatalogData(ctx);
         if (catalog) {
             return catalog;
         } else {

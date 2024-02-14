@@ -55,7 +55,7 @@ export class ProductCatalogPlugin implements OnApplicationBootstrap {
           });
 
         try {
-          const catalog = await this.productCatalogService.getProductCatalogData(ctx);
+          const catalog = await this.productCatalogService.saveProductCatalogData(ctx);
         } catch (error) {
           throw error;
         }         
