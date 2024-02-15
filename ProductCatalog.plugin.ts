@@ -8,7 +8,6 @@ import {
   Type,
 } from "@vendure/core";
 import * as path from "path";
-import { CronEvent } from "vendure-cron-plugin";
 import { filter } from "rxjs/operators";
 import { OnApplicationBootstrap } from "@nestjs/common";
 import { ProductsCatalogController, ProductsCatalogControllerInit, ProductsCatalogControllerAllProducts } from "./api/productCatalog.controller";
@@ -44,7 +43,6 @@ export class ProductCatalogPlugin implements OnApplicationBootstrap {
   }
 
   async onApplicationBootstrap() {
-
     this.jobQueue = await this.jobQueueService.createQueue({
       name: "writeProductCatalog",
       process: async (job) => {
@@ -60,15 +58,6 @@ export class ProductCatalogPlugin implements OnApplicationBootstrap {
           throw error;
         }         
       }
-    });
-
-
-    this.eventBus
-    .ofType(CronEvent)
-    .pipe(filter((event) => event.taskId === "writeProductCatalog"))
-    .subscribe(async (event) => {
-      const ctx = event.ctx;
-      this.jobQueue.add({ ctx }, { retries: 1});
     });
   }  
 }
