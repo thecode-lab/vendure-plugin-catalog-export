@@ -37,7 +37,7 @@ CronPlugin.init({
   ],
 };
 ```
-Add the Eventlistener
+Add the Eventlistener to plugin
 ```typescript
 //ProductCatalog.plugin.ts
 import { CronEvent } from "vendure-cron-plugin";
