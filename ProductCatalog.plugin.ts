@@ -8,7 +8,6 @@ import {
   Type,
 } from "@vendure/core";
 import * as path from "path";
-import { filter } from "rxjs/operators";
 import { OnApplicationBootstrap } from "@nestjs/common";
 import { ProductsCatalogController, ProductsCatalogControllerInit, ProductsCatalogControllerAllProducts } from "./api/productCatalog.controller";
 import { ProductCatalogService } from "./service/productCatalog.service";
@@ -27,7 +26,7 @@ export interface ProductCatalogOptions {
   }
 })
 
-export class ProductCatalogPlugin implements OnApplicationBootstrap {
+export default class ProductCatalogPlugin implements OnApplicationBootstrap {
   constructor(
     private eventBus: EventBus,
     private productCatalogService: ProductCatalogService,
@@ -61,3 +60,4 @@ export class ProductCatalogPlugin implements OnApplicationBootstrap {
     });
   }  
 }
+
