@@ -9,7 +9,7 @@ import {
 } from "@vendure/core";
 import * as path from "path";
 import { OnApplicationBootstrap } from "@nestjs/common";
-import { ProductsCatalogController, ProductsCatalogControllerInit, ProductsCatalogControllerAllProducts } from "./api/productCatalog.controller";
+import { ProductsCatalogController, ProductsCatalogControllerInit, ProductsCatalogControllerAllProducts } from "../src/api/productCatalog.controller";
 import { ProductCatalogService } from "./service/productCatalog.service";
 
 export interface ProductCatalogOptions {

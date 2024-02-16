@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { Ctx, RequestContext} from '@vendure/core';
-import {ProductCatalogService} from '../service/productCatalog.service';
+import {ProductCatalogService} from '../../vendure-plugin-catalog-export/service/productCatalog.service';
 
 //read and return productcatalog from file
  @Controller('productcatalog')

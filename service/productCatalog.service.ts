@@ -6,7 +6,7 @@ import {
   ConfigService,
 } from "@vendure/core";
 import * as path from "path";
-import { ProductCatalogPlugin } from "../ProductCatalog.plugin";
+import { ProductCatalogPlugin } from "../src/ProductCatalog.plugin";
 import { Readable } from "stream";
 
 
