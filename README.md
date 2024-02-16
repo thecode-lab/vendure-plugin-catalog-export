@@ -12,6 +12,7 @@ const config: VendureConfig = {
     ProductCatalogPlugin.init({
       localPath:'../myCatalogDir', //relative to AssetUploadDir
     }),
+    ProductCatalogPlugin, //save without localPath into default folder static/productcatalog
     ....
   ],
 };

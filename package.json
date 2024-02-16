@@ -1,10 +1,10 @@
 {
-  "name": "maune-package",
+  "name": "vendure-pluging-catalog-export",
   "version": "1.0.0",
   "description": "The plugin automates the generation of a comprehensive JSON representation of your product catalog. This data is made accessible via a REST API endpoint, facilitating easy retrieval for frontend applications.",
   "main": "dist/index.js",
   "module": "dist/index.js",
-  "type": "module",
+  "type": "commonjs",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thecode-lab/vendure-plugin-catalog-export.git"
