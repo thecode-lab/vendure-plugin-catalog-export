@@ -18,41 +18,6 @@ const config: VendureConfig = {
 };
 ```
 
-# Installation a CronEvent
-if you want to use cronjobs in vendure use the vendure-cron-plugin and add to vendure-config
-
-```typescript
-const config: VendureConfig = {
-  // ... other configurations
-
-  plugins: [
-CronPlugin.init({
-      cron: [
-        {
-          schedule: '0 */12 * * *',
-          taskId: 'writeProductCatalog'  
-        },
-      ],
-    }),
-    ....
-  ],
-};
-```
-Add the Eventlistener to plugin
-```typescript
-//ProductCatalog.plugin.ts
-import { CronEvent } from "vendure-cron-plugin";
-
- // add the following code after async onApplicationBootstrap() {...}
-
-    this.eventBus
-    .ofType(CronEvent)
-    .pipe(filter((event) => event.taskId === "writeProductCatalog"))
-    .subscribe(async (event) => {
-      const ctx = event.ctx;
-      this.jobQueue.add({ ctx }, { retries: 1});
-    });
-```
 
 # APIs
 http://localhost:3000/productcatalog-save to init and save catalog  

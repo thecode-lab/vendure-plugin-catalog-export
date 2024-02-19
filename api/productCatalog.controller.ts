@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { Ctx, RequestContext} from '@vendure/core';
-import {ProductCatalogService} from '../../vendure-plugin-catalog-export/service/productCatalog.service';
+import {ProductCatalogService} from '../service/productCatalog.service';
 
 //read and return productcatalog from file
  @Controller('productcatalog')
@@ -8,8 +8,13 @@ import {ProductCatalogService} from '../../vendure-plugin-catalog-export/service
     constructor(private ProductCatalogService: ProductCatalogService) {
     }
     @Get()
-     async findAll(@Ctx() ctx: RequestContext) {    
-        return this.ProductCatalogService.readCatalogFromFile();
+     async readFromFile() {  
+        const catalog = await this.ProductCatalogService.readCatalogFromFile();
+        if(catalog){
+            return catalog;
+        }else{
+            return ("Couldn't find any catalog, try to save the catalaog with /productcatalog-save first.")
+        }
     } 
  }
 
@@ -19,13 +24,9 @@ export class ProductsCatalogControllerInit {
     constructor(private ProductCatalogService: ProductCatalogService) {
     }
     @Get()
-     async initAll(@Ctx() ctx: RequestContext) {    
-        const catalog = await this.ProductCatalogService.saveProductCatalogData(ctx);
-        if (catalog) {
-            return catalog;
-        } else {
-            return { message: 'Failed to initialize data.' };
-        }
+     async writeCatalogToFile() {    
+        const result = await this.ProductCatalogService.saveCatalogToFile();
+        return result ;
     } 
 }
 
@@ -35,7 +36,7 @@ export class ProductsCatalogControllerAllProducts {
     constructor(private ProductCatalogService: ProductCatalogService) {
     }
     @Get()
-     async initAll(@Ctx() ctx: RequestContext) {    
+     async getAllProducts(@Ctx() ctx: RequestContext) {    
         return await this.ProductCatalogService.getAllProductRel(ctx);
     } 
 }
