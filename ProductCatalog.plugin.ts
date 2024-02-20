@@ -8,7 +8,7 @@ import { ProductsCatalogController, ProductsCatalogControllerInit, ProductsCatal
 import { ProductCatalogService } from "./service/productCatalog.service";
 
 export interface ProductCatalogOptions {
-  localPath?: string; 
+  path?: string; 
 }
 
 @VendurePlugin({
@@ -23,10 +23,10 @@ export interface ProductCatalogOptions {
 
 export class ProductCatalogPlugin  {
 
-  static localPath: string = path.join('../productcatalog');
+  static path: string = '../productcatalog';
 
   static init(options: ProductCatalogOptions): Type<ProductCatalogPlugin> {
-    ProductCatalogPlugin.localPath = options?.localPath || this.localPath;
+    ProductCatalogPlugin.path = options?.path || this.path;
     return ProductCatalogPlugin;
   }
 

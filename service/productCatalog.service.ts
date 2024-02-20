@@ -55,7 +55,7 @@ export class ProductCatalogService {
   private saveCatalogJobQueue: JobQueue;
 
   private readonly filePath = path.join(
-    ProductCatalogPlugin.localPath,
+    ProductCatalogPlugin.path,
     "productcatalog.json"
   );
 
