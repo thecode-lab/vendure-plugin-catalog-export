@@ -282,8 +282,12 @@ export class ProductCatalogService {
         return jsonData;
       } 
     } catch (error:any) {
-      
-      return error.message.replace('ENOENT: ','');
+      if (error.errno === -2 ){
+        const errorMessage = error.message.replace('ENOENT: ', '') + '<br><br>' + 'before proceeding, try saving the catalog with <b>/productcatalog-save</b>.'
+        return errorMessage;       
+      }else{
+         return error.message
+      } 
     }
   }
 }
