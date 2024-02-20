@@ -12,8 +12,6 @@ import {ProductCatalogService} from '../service/productCatalog.service';
         const catalog = await this.ProductCatalogService.readCatalogFromFile();
         if(catalog){
             return catalog;
-        }else{
-            return ("Couldn't find any catalog, try to save the catalaog with /productcatalog-save first.")
         }
     } 
  }

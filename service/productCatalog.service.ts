@@ -14,6 +14,7 @@ import { ProductCatalogPlugin } from "../ProductCatalog.plugin";
 import { Readable } from "stream";
 import { of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { ErrorResult } from "@vendure/core/dist/common/error/generated-graphql-shop-errors";
 
 function capitalizeFirstLetter(input: string): string {
   return input
@@ -279,19 +280,10 @@ export class ProductCatalogService {
       if (stream) {
         const jsonData = await streamToJson(stream);
         return jsonData;
-      } else {
-        console.error("Catalog JSON file not found.");
-        return {
-          error:
-            "Couldn't find catalog. Try saving the catalog with /productcatalog-save first.",
-        };
-      }
-    } catch (error) {
-      console.error("Error reading catalog data from asset:", error);
-      return {
-        error:
-          "Couldn't find catalog. Try saving the catalog with /productcatalog-save first.",
-      };
+      } 
+    } catch (error:any) {
+      
+      return error.message.replace('ENOENT: ','');
     }
   }
 }
