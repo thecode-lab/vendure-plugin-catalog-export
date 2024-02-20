@@ -10,9 +10,9 @@ const config: VendureConfig = {
 
   plugins: [
     ProductCatalogPlugin.init({
-      localPath:'../myCatalogDir', //relative to AssetUploadDir
+      path:'../myCatalogDir', //relative to AssetUploadDir
     }),
-    ProductCatalogPlugin, //save without localPath into default folder static/productcatalog
+    ProductCatalogPlugin, //save without path into default folder static/productcatalog
     ....
   ],
 };
