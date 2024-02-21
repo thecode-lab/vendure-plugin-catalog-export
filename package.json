@@ -1,6 +1,6 @@
 {
   "name": "vendure-plugin-catalog-export",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "The plugin automates the generation of a comprehensive JSON representation of your product catalog. This data is made accessible via a REST API endpoint, facilitating easy retrieval for frontend applications.",
   "main": "dist/index.js",
   "module": "dist/index.js",

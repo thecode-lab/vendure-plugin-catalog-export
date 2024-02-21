@@ -18,7 +18,7 @@ const config: VendureConfig = {
       localPath:'../myCatalogDir', //relative to AssetUploadDir
     }),
     ProductCatalogPlugin, //save without localPath into default folder static/productcatalog
-    ....
+    ...
   ],
 };
 ```
@@ -28,7 +28,7 @@ http://localhost:3000/productcatalog-save to init and save catalog
 http://localhost:3000/productcatalog to access the json  
 http://localhost:3000/productcatalogAll only list all Products. 
 
-# Example
+# Example output
 ## JSON
 ```json
 {
@@ -47,7 +47,7 @@ http://localhost:3000/productcatalogAll only list all Products.
                   "name": "Category"
               }
           },
-        ...
+        "..."
       ],
       "assets": [
           {
@@ -66,7 +66,7 @@ http://localhost:3000/productcatalogAll only list all Products.
               "code": "laptop-screen-size",
               "name": "screen size"
           },
-          ...
+          "..."
       ],
       "variants": [
           {
@@ -88,10 +88,10 @@ http://localhost:3000/productcatalogAll only list all Products.
                   }
               ]
           },
-          ...
+          "..."
       ]
   },
-  ...
+  "..."
 }
 ```
 
