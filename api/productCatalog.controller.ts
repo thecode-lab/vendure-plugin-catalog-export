@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { Ctx, RequestContext} from '@vendure/core';
+import { Ctx, Permission, RequestContext, Allow} from '@vendure/core';
 import {ProductCatalogService} from '../service/productCatalog.service';
 
 //read and return productcatalog from file
@@ -22,6 +22,7 @@ export class ProductsCatalogControllerInit {
     constructor(private ProductCatalogService: ProductCatalogService) {
     }
     @Get()
+    @Allow(Permission.Authenticated)
      async writeCatalogToFile() {    
         const result = await this.ProductCatalogService.saveCatalogToFile();
         return result ;
@@ -34,6 +35,7 @@ export class ProductsCatalogControllerAllProducts {
     constructor(private ProductCatalogService: ProductCatalogService) {
     }
     @Get()
+    @Allow(Permission.Authenticated)
      async getAllProducts(@Ctx() ctx: RequestContext) {    
         return await this.ProductCatalogService.getAllProductRel(ctx);
     } 
