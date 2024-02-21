@@ -241,7 +241,7 @@ export class ProductCatalogService {
 
           return `${totalItems} products saved to ${savedTo}`;
         } catch (error) {
-          console.error("nutte",error);
+          console.error(error);
         }
       },
     });
